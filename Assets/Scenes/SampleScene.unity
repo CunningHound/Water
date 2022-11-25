@@ -331,16 +331,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   focusObject: {fileID: 963194225}
-  nearResolution: 0.25
-  nearRange: 50
-  midResolution: 0.5
-  midRange: 250
+  nearResolution: 0.5
+  nearRange: 250
+  midResolution: 1
+  midRange: 1000
   enableMidRange: 1
-  farResolution: 1
-  farRange: 1000
+  farResolution: 2
+  farRange: 2000
   enableFarRange: 1
-  distantResolution: 2
-  distantRange: 2000
+  distantResolution: 4
+  distantRange: 4000
   enableDistantRange: 1
   waterMaterial: {fileID: 2100000, guid: 1e83142265450f74892a751cbcecb7c4, type: 2}
 --- !u!4 &1233864625

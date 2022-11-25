@@ -3,100 +3,115 @@ Shader "Custom/WaterShader"
     Properties
     {
         _Color("Color", Color) = (0.1,0.5,1,1)
+		_MainTex("Albedo (RGB)", 2D) = "white" {}
+		_Glossiness("Smoothness", Range(0,1)) = 0.5
+		_Metallic("Metallic", Range(0,1)) = 0.4
+		_Alpha("Alpha", Range(0,1)) = 0.5
         _Steepness("Steepness", Vector) = (0.0,0.0,0.0,0.0)
 		_Wavelength("Wavelength", Vector) = (0.0,0.0,0.0,0.0)
 		_Direction("Direction", Vector) = (0.0,0.0,0.0,0.0)
     }
 
-		SubShader
+	SubShader
 	{
 		Tags
 		{
-			"RenderType" = "transparent"
+			"RenderType" = "Transparent"
 		}
-
-		Pass
-		{
-
-		Cull Off
+		LOD 200
+		CULL OFF
 
 		CGPROGRAM
-		#include "UnityShaderVariables.cginc"
-		#pragma vertex vertexFunc
-		#pragma fragment fragFunc
+		#pragma surface surf Standard fullforwardshadows vertex:vert addshadow
 
+
+		struct Input {
+			float2 uv_MainTex;
+		};
+
+		sampler2D _MainTex;
+
+		half _Glossiness;
+		half _Metallic;
 		float4 _Color;
+
+		void surf(Input IN, inout SurfaceOutputStandard o)
+		{
+			fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
+			o.Albedo = c.rgb;
+			o.Metallic = _Metallic;
+			o.Smoothness = _Glossiness;
+			o.Alpha = c.a;
+		}
+
+
 		float4 _Steepness;
 		float4 _Wavelength;
 		float4 _Direction;
 
 		static const float PI = 3.14159f;
 
-		struct vertexInput {
-			float4 vertex : POSITION;
-		};
-
-		struct vertexOutput {
-			float4 pos : SV_POSITION;
-		};
-
-		float3 directionComponents(float IN)
+		float2 directionComponents(float IN)
 		{
 			float angle_rad = radians(IN);
-			float3 res;
+			float2 res;
 			res.x = cos(angle_rad);
-			res.y = 0;
-			res.z = sin(angle_rad);
+			res.y = sin(angle_rad);
 			return res;
 		}
 
-		float3 gerstnerOffsets(float4 worldPos, float3 dir, float s, float k)
+		float3 gerstnerWave(float3 wave, float3 pos, inout float3 tangent, inout float3 binormal)
 		{
-			float3 result;
-
-			float a = s / k;
+			float steepness = wave.y;
+			float wavelength = wave.z;
+			float k = 2 * PI / wavelength; // wave number
 			float c = sqrt(9.8 / k);
+			float2 d = normalize(directionComponents(wave.x));
+			float f = k * dot(d,pos.xz) - c * _Time;
+			float a = steepness / k;
 
-			float f = k * (dot(dir, worldPos.xyz) - c * _Time);
-			result.x = dir.x * a * sin(f);
-			result.y = a * cos(f);
-			result.z = dir.z * a * sin(f);
+			tangent += float3(
+				-d.x * d.x * steepness * cos(f),
+				d.x * steepness * sin(f),
+				-d.x * d.y * steepness * cos(f)
+				);
 
-			return result;
+			binormal += float3(
+				-d.x * d.y * steepness * cos(f),
+				d.y * steepness * sin(f),
+				-d.y * d.y * steepness * cos(f)
+				);
+
+			return float3(
+				d.x * a * sin(f),
+				-a * cos(f),
+				d.y * a * sin(f)
+				);
+
 		}
 
-		vertexOutput vertexFunc(vertexInput IN)
-		{
-			vertexOutput o;
 
-			float4 worldPos = mul(unity_ObjectToWorld, IN.vertex);
+		void vert(inout appdata_full vertexData)
+		{
+			float3 worldPos = vertexData.vertex.xyz;
+
 			float3 displacement = (0,0,0);
+			float3 tangent = (1, 0, 0);
+			float3 binormal = (0, 0, 1);
 			for (int i = 0; i < 4; i++)
 			{
-				if (_Wavelength[i] > 0.)
-				{
-					float waveNumber = 2 * PI / _Wavelength;
-					float3 dir = directionComponents(_Direction[i]);
-
-					displacement += gerstnerOffsets(worldPos, dir, _Steepness[i], waveNumber);
-				}
+				float3 wave = float3(_Direction[i], _Steepness[i], _Wavelength[i]);
+				worldPos += gerstnerWave(wave, worldPos, tangent, binormal);
 			}
 
-			worldPos.x += displacement.x;
-			worldPos.y -= displacement.y;
-			worldPos.z += displacement.z;
+			float3 normal = normalize(cross(binormal, tangent));
 
-			o.pos = mul(UNITY_MATRIX_VP, worldPos);
-			return o;
-		}
-
-		float4 fragFunc(vertexOutput IN) : COLOR
-		{
-			return _Color;
+			vertexData.vertex.xyz = worldPos;
+			// vertexData.normal = worldPos;
+			vertexData.normal = normal;
 		}
 
 		ENDCG
-		}
 	}
-		FallBack "Diffuse"
+	FallBack "Diffuse"
 }
