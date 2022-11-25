@@ -45,20 +45,17 @@ public class WaveManager : MonoBehaviour
     void Update()
     {
         //Vector4 directions = new Vector4(0f,0f,0f,0f);
-        //Vector4 speeds = new Vector4(0f,0f,0f,0f);
         //Vector4 wavelengths = new Vector4(0f,0f,0f,0f);
         //Vector4 amplitudes = new Vector4();
 
         //for(int i = 0; i < maxActiveWaves; i++)
         //{
         //    directions[i] = waves[i].direction;
-        //    speeds[i] = waves[i].speed;
         //    wavelengths[i] = waves[i].wavelength;
         //    amplitudes[i] = waves[i].amplitude;
         //}
 
         //waterMaterial.SetVector("_Direction", directions);
-        //waterMaterial.SetVector("_Speed", speeds);
         //waterMaterial.SetVector("_Wavelength", wavelengths);
         //waterMaterial.SetVector("_Amplitude", amplitudes);
     }

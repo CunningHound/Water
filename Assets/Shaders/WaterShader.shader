@@ -3,8 +3,7 @@ Shader "Custom/WaterShader"
     Properties
     {
         _Color("Color", Color) = (0.1,0.5,1,1)
-        _Amplitude("Amplitude", Vector) = (0.0,0.0,0.0,0.0)
-        _Speed("Speed", Vector) = (0.0,0.0,0.0,0.0)
+        _Steepness("Steepness", Vector) = (0.0,0.0,0.0,0.0)
 		_Wavelength("Wavelength", Vector) = (0.0,0.0,0.0,0.0)
 		_Direction("Direction", Vector) = (0.0,0.0,0.0,0.0)
     }
@@ -27,10 +26,11 @@ Shader "Custom/WaterShader"
 		#pragma fragment fragFunc
 
 		float4 _Color;
-		float4 _Amplitude;
-		float4 _Speed;
+		float4 _Steepness;
 		float4 _Wavelength;
 		float4 _Direction;
+
+		static const float PI = 3.14159f;
 
 		struct vertexInput {
 			float4 vertex : POSITION;
@@ -50,31 +50,41 @@ Shader "Custom/WaterShader"
 			return res;
 		}
 
-		float getDisplacementComponent(float pos, float directionalComponent, float wavelength, float speed)
+		float3 gerstnerOffsets(float4 worldPos, float3 dir, float s, float k)
 		{
-			return cos((pos * directionalComponent / wavelength) + speed * _Time);
-		}
+			float3 result;
 
+			float a = s / k;
+			float c = sqrt(9.8 / k);
+
+			float f = k * (dot(dir, worldPos.xyz) - c * _Time);
+			result.x = dir.x * a * sin(f);
+			result.y = a * cos(f);
+			result.z = dir.z * a * sin(f);
+
+			return result;
+		}
 
 		vertexOutput vertexFunc(vertexInput IN)
 		{
 			vertexOutput o;
 
 			float4 worldPos = mul(unity_ObjectToWorld, IN.vertex);
-			float displacement = 0;
+			float3 displacement = (0,0,0);
 			for (int i = 0; i < 4; i++)
 			{
 				if (_Wavelength[i] > 0.)
 				{
+					float waveNumber = 2 * PI / _Wavelength;
 					float3 dir = directionComponents(_Direction[i]);
-					float this_displacement = 0;
-					this_displacement += getDisplacementComponent(worldPos.x, dir.x, _Wavelength[i], _Speed[i]);
-					this_displacement += getDisplacementComponent(worldPos.z, dir.z, _Wavelength[i], _Speed[i]);
-					displacement += this_displacement*_Amplitude[i];
+
+					displacement += gerstnerOffsets(worldPos, dir, _Steepness[i], waveNumber);
 				}
 			}
 
-			worldPos.y = worldPos.y + displacement;
+			worldPos.x += displacement.x;
+			worldPos.y -= displacement.y;
+			worldPos.z += displacement.z;
 
 			o.pos = mul(UNITY_MATRIX_VP, worldPos);
 			return o;

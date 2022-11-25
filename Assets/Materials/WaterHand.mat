@@ -128,9 +128,10 @@ Material:
     - _Amplitude: {r: 0.5, g: 0.2, b: 0.05, a: 0}
     - _BaseColor: {r: 0.36009255, g: 0.49602246, b: 0.6415094, a: 0.56078434}
     - _Color: {r: 0.36009255, g: 0.49602246, b: 0.6415094, a: 0.56078434}
-    - _Direction: {r: 180, g: 180, b: 180, a: 0}
+    - _Direction: {r: 180, g: 245, b: 165, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
     - _Speed: {r: 0.5, g: 2, b: 5, a: 0}
-    - _Wavelength: {r: 10, g: 1, b: 0.2, a: 0}
+    - _Steepness: {r: 0.5, g: 0.7, b: 0.9, a: 0}
+    - _Wavelength: {r: 11, g: 2, b: 0.3, a: 0}
   m_BuildTextureStacks: []
