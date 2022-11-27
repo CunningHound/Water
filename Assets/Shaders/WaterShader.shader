@@ -7,9 +7,10 @@ Shader "Custom/WaterShader"
 		_Glossiness("Smoothness", Range(0,1)) = 0.5
 		_Metallic("Metallic", Range(0,1)) = 0.4
 		_Alpha("Alpha", Range(0,1)) = 0.5
-        _Steepness("Steepness", Vector) = (0.0,0.0,0.0,0.0)
-		_Wavelength("Wavelength", Vector) = (0.0,0.0,0.0,0.0)
-		_Direction("Direction", Vector) = (0.0,0.0,0.0,0.0)
+		_Wave1("Wave 1 (dir, steepness, wavelength)", Vector) = (0, 0.5, 10, 0)
+		_Wave2("Wave 2 (dir, steepness, wavelength)", Vector) = (90, 0.5, 10, 0)
+		_Wave3("Wave 3 (dir, steepness, wavelength)", Vector) = (90, 0.5, 10, 0)
+		_Wave4("Wave 4 (dir, steepness, wavelength)", Vector) = (90, 0.5, 10, 0)
     }
 
 	SubShader
@@ -45,9 +46,14 @@ Shader "Custom/WaterShader"
 		}
 
 
-		float4 _Steepness;
-		float4 _Wavelength;
-		float4 _Direction;
+		//float4 _Steepness;
+		//float4 _Wavelength;
+		//float4 _Direction;
+
+		float4 _Wave1;
+		float4 _Wave2;
+		float4 _Wave3;
+		float4 _Wave4;
 
 		static const float PI = 3.14159f;
 
@@ -60,18 +66,18 @@ Shader "Custom/WaterShader"
 			return res;
 		}
 
-		float3 gerstnerWave(float3 wave, float3 pos, inout float3 tangent, inout float3 binormal)
+		float3 gerstnerWave(float4 wave, float3 pos, inout float3 tangent, inout float3 binormal)
 		{
 			float steepness = wave.y;
 			float wavelength = wave.z;
 			float k = 2 * PI / wavelength; // wave number
 			float c = sqrt(9.8 / k);
 			float2 d = normalize(directionComponents(wave.x));
-			float f = k * dot(d,pos.xz) - c * _Time;
+			float f = k * dot(d,pos.xz) - c * _Time.y;
 			float a = steepness / k;
 
 			tangent += float3(
-				-d.x * d.x * steepness * cos(f),
+				1 -d.x * d.x * steepness * cos(f),
 				d.x * steepness * sin(f),
 				-d.x * d.y * steepness * cos(f)
 				);
@@ -79,7 +85,7 @@ Shader "Custom/WaterShader"
 			binormal += float3(
 				-d.x * d.y * steepness * cos(f),
 				d.y * steepness * sin(f),
-				-d.y * d.y * steepness * cos(f)
+				1 -d.y * d.y * steepness * cos(f)
 				);
 
 			return float3(
@@ -95,19 +101,16 @@ Shader "Custom/WaterShader"
 		{
 			float3 worldPos = vertexData.vertex.xyz;
 
-			float3 displacement = (0,0,0);
-			float3 tangent = (1, 0, 0);
-			float3 binormal = (0, 0, 1);
-			for (int i = 0; i < 4; i++)
-			{
-				float3 wave = float3(_Direction[i], _Steepness[i], _Wavelength[i]);
-				worldPos += gerstnerWave(wave, worldPos, tangent, binormal);
-			}
+			float3 tangent = (0, 0, 0);
+			float3 binormal = (0, 0, 0);
+			worldPos += gerstnerWave(_Wave1, worldPos, tangent, binormal);
+			worldPos += gerstnerWave(_Wave2, worldPos, tangent, binormal);
+			worldPos += gerstnerWave(_Wave3, worldPos, tangent, binormal);
+			worldPos += gerstnerWave(_Wave4, worldPos, tangent, binormal);
 
 			float3 normal = normalize(cross(binormal, tangent));
 
 			vertexData.vertex.xyz = worldPos;
-			// vertexData.normal = worldPos;
 			vertexData.normal = normal;
 		}
 
