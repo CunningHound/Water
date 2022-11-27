@@ -4,19 +4,16 @@ using UnityEngine;
 
 public struct WaveProperties
 {
-    public WaveProperties(float _direction, float _speed, float _wavelength, float _amplitude)
+    public WaveProperties(float _direction, float _steepness, float _wavelength)
     {
         direction = _direction;
-        speed = _speed;
+        steepness = _steepness;
         wavelength = _wavelength;
-        amplitude = _amplitude;
     }
 
     public float direction { get; set; }
-    public float speed { get; set; }
+    public float steepness { get; set; }
     public float wavelength { get; set; }
-    public float amplitude { get; set; }
-
 }
 
 public class WaveManager : MonoBehaviour
@@ -26,37 +23,112 @@ public class WaveManager : MonoBehaviour
     public int windDirection;
     public int windSpeed;
 
+    public float minWavelength;
+    public float minSteepness;
     List<WaveProperties> waves;
-    [Range(0,4)]
-    public int maxActiveWaves;
+    WaveProperties transitionWave;
+    private int numWaves = 4;
+
+    public float waveTransitionPeriod;
+    public float waveTransitionDuration;
+    private bool waveTransitionInProgress;
+    private int decreasingWaveIndex;
+
+    private float timeSinceTransition;
 
     // Start is called before the first frame update
     void Start()
     {
+        timeSinceTransition = 0;
         waves = new List<WaveProperties>();
-        for (int i = 0; i < maxActiveWaves; i++)
+        for (int i = 0; i < numWaves; i++)
         {
-            WaveProperties wave = new WaveProperties(windDirection + Random.Range(-10f*(i+1), 10f*(i+1)), (i+1)*(i+1), 10f*windSpeed/((3*i)+1), windSpeed/((i+1)*(i+1)));
-            waves.Add(wave);
+            waves.Add(GetNewWave());
+        }
+        transitionWave = new WaveProperties(0f, 0f, 1f);
+    }
+
+    void FixedUpdate()
+    {
+        if(!waveTransitionInProgress)
+        {
+            Debug.Log("no transition in progress");
+            timeSinceTransition += Time.deltaTime;
+            Debug.Log("time since = " + timeSinceTransition);
+            if( timeSinceTransition > waveTransitionPeriod )
+            {
+                Debug.Log("Starting transition");
+                StartWaveTransition();
+            }
+        }
+        else
+        {
+
+            setShaderWaveProperties();
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    void StartWaveTransition()
     {
-        //Vector4 directions = new Vector4(0f,0f,0f,0f);
-        //Vector4 wavelengths = new Vector4(0f,0f,0f,0f);
-        //Vector4 amplitudes = new Vector4();
+        Debug.Log("starting wave transition");
+        if(waveTransitionInProgress)
+        {
+            Debug.Log("exiting early, already in progress");
+            return; // only transition one wave at a time
+        }
+        timeSinceTransition = 0;
+        waveTransitionInProgress = true;
 
-        //for(int i = 0; i < maxActiveWaves; i++)
-        //{
-        //    directions[i] = waves[i].direction;
-        //    wavelengths[i] = waves[i].wavelength;
-        //    amplitudes[i] = waves[i].amplitude;
-        //}
-
-        //waterMaterial.SetVector("_Direction", directions);
-        //waterMaterial.SetVector("_Wavelength", wavelengths);
-        //waterMaterial.SetVector("_Amplitude", amplitudes);
+        StartCoroutine(TransitionWave());
     }
+
+    IEnumerator TransitionWave()
+    {
+        Debug.Log("initiating transition");
+        int waveToReplace = Random.Range(0, waves.Count);
+        float originalSteepness = waves[waveToReplace].steepness;
+
+        WaveProperties targetWave = GetNewWave();
+
+        float transitionTime = 0;
+        while(transitionTime < waveTransitionDuration)
+        {
+            Debug.Log("in transition, transition time = " + transitionTime + " of " + waveTransitionDuration);
+            WaveProperties adjustedWave = waves[waveToReplace];
+            adjustedWave.steepness = Mathf.Lerp(originalSteepness, 0, transitionTime/waveTransitionDuration);
+            waves[waveToReplace] = adjustedWave;
+            Debug.Log("decreasing steepness = " + waves[waveToReplace].steepness);
+
+            transitionWave = targetWave;
+            float transitionSteepness = Mathf.Lerp(0, targetWave.steepness, transitionTime / waveTransitionDuration);
+            Debug.Log("transition steepness = " + transitionSteepness);
+            transitionWave.steepness = Mathf.Lerp(0, targetWave.steepness, transitionTime / waveTransitionDuration);
+            transitionTime += Time.deltaTime;
+            Debug.Log("setting shader values");
+            yield return null;
+        }
+
+        Debug.Log("completed transition");
+
+        waves[waveToReplace] = targetWave;
+        waveTransitionInProgress = false;
+        timeSinceTransition = 0;
+    }
+
+    WaveProperties GetNewWave()
+    {
+        return new WaveProperties(Random.Range(windDirection - 30f, windDirection + 30f), Random.Range(minSteepness, 0.25f), Random.Range(minWavelength, windSpeed));
+    }
+
+    void setShaderWaveProperties()
+    {
+        waterMaterial.SetVector("_Wave1", new Vector4(waves[0].direction, waves[0].steepness, waves[0].wavelength, 0));
+        waterMaterial.SetVector("_Wave2", new Vector4(waves[1].direction, waves[1].steepness, waves[1].wavelength, 1));
+        waterMaterial.SetVector("_Wave3", new Vector4(waves[2].direction, waves[2].steepness, waves[2].wavelength, 2));
+        waterMaterial.SetVector("_Wave4", new Vector4(waves[3].direction, waves[3].steepness, waves[3].wavelength, 3));
+
+        // transition wave, set steepness to zero if no transition in progress
+        // waterMaterial.SetVector("_Wave5", new Vector4(transitionWave.direction, waveTransitionInProgress ? transitionWave.steepness : 0f, transitionWave.wavelength));
+    }
+
 }
