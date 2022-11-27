@@ -7,10 +7,11 @@ Shader "Custom/WaterShader"
 		_Glossiness("Smoothness", Range(0,1)) = 0.5
 		_Metallic("Metallic", Range(0,1)) = 0.4
 		_Alpha("Alpha", Range(0,1)) = 0.5
-		_Wave1("Wave 1 (dir, steepness, wavelength)", Vector) = (0, 0.5, 10, 0)
-		_Wave2("Wave 2 (dir, steepness, wavelength)", Vector) = (90, 0.5, 10, 0)
-		_Wave3("Wave 3 (dir, steepness, wavelength)", Vector) = (90, 0.5, 10, 0)
-		_Wave4("Wave 4 (dir, steepness, wavelength)", Vector) = (90, 0.5, 10, 0)
+		_Wave1("Wave 1 (dir, steepness, wavelength)", Vector) = (90, 0.3, 15, 0)
+		_Wave2("Wave 2 (dir, steepness, wavelength)", Vector) = (80, 0.2, 8, 0)
+		_Wave3("Wave 3 (dir, steepness, wavelength)", Vector) = (100, 0.1, 4, 0)
+		_Wave4("Wave 4 (dir, steepness, wavelength)", Vector) = (95, 0.05, 2, 0)
+		_Wave5("Wave 5 (dir, steepness, wavelength)", Vector) = (105, 0.05, 1, 0)
     }
 
 	SubShader
@@ -54,6 +55,7 @@ Shader "Custom/WaterShader"
 		float4 _Wave2;
 		float4 _Wave3;
 		float4 _Wave4;
+		float4 _Wave5;
 
 		static const float PI = 3.14159f;
 
@@ -107,6 +109,7 @@ Shader "Custom/WaterShader"
 			worldPos += gerstnerWave(_Wave2, worldPos, tangent, binormal);
 			worldPos += gerstnerWave(_Wave3, worldPos, tangent, binormal);
 			worldPos += gerstnerWave(_Wave4, worldPos, tangent, binormal);
+			worldPos += gerstnerWave(_Wave5, worldPos, tangent, binormal);
 
 			float3 normal = normalize(cross(binormal, tangent));
 
