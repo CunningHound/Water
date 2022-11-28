@@ -310,7 +310,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1233864625}
-  - component: {fileID: 1233864624}
+  - component: {fileID: 1233864626}
   m_Layer: 0
   m_Name: WaterSurface
   m_TagString: Untagged
@@ -318,31 +318,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1233864624
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1233864623}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c5a315ff0f08b6d46913c8f3d424604b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  focusObject: {fileID: 963194225}
-  nearResolution: 0.1
-  nearRange: 50
-  midResolution: 0.5
-  midRange: 100
-  enableMidRange: 1
-  farResolution: 2
-  farRange: 2000
-  enableFarRange: 0
-  distantResolution: 4
-  distantRange: 4000
-  enableDistantRange: 0
-  waterMaterial: {fileID: 2100000, guid: 1e83142265450f74892a751cbcecb7c4, type: 2}
 --- !u!4 &1233864625
 Transform:
   m_ObjectHideFlags: 0
@@ -358,6 +333,31 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1233864626
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1233864623}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5a315ff0f08b6d46913c8f3d424604b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  focusObject: {fileID: 963194225}
+  nearResolution: 0.1
+  nearRange: 10
+  midResolution: 0.2
+  midRange: 30
+  enableMidRange: 1
+  farResolution: 0.3
+  farRange: 60
+  enableFarRange: 1
+  distantResolution: 0.5
+  distantRange: 100
+  enableDistantRange: 1
+  waterMaterial: {fileID: 2100000, guid: 1e83142265450f74892a751cbcecb7c4, type: 2}
 --- !u!1 &1888044256
 GameObject:
   m_ObjectHideFlags: 0
@@ -391,8 +391,9 @@ MonoBehaviour:
   windDirection: 90
   windSpeed: 20
   minWavelength: 1.5
-  waveTransitionPeriod: 45
-  waveTransitionDuration: 15
+  minSteepness: 0
+  waveTransitionPeriod: 5
+  waveTransitionDuration: 30
 --- !u!4 &1888044258
 Transform:
   m_ObjectHideFlags: 0

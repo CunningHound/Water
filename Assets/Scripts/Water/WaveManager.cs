@@ -56,12 +56,9 @@ public class WaveManager : MonoBehaviour
     {
         if(!waveTransitionInProgress)
         {
-            Debug.Log("no transition in progress");
             timeSinceTransition += Time.deltaTime;
-            Debug.Log("time since = " + timeSinceTransition);
             if( timeSinceTransition > waveTransitionPeriod )
             {
-                Debug.Log("Starting transition");
                 StartWaveTransition();
             }
         }
@@ -74,10 +71,8 @@ public class WaveManager : MonoBehaviour
 
     void StartWaveTransition()
     {
-        Debug.Log("starting wave transition");
         if(waveTransitionInProgress)
         {
-            Debug.Log("exiting early, already in progress");
             return; // only transition one wave at a time
         }
         timeSinceTransition = 0;
@@ -92,29 +87,21 @@ public class WaveManager : MonoBehaviour
 
     void handleWaveTransition()
     {
-        Debug.Log("initiating transition");
         float originalSteepness = waves[waveToReplace].steepness;
 
         if (timeInTransition < waveTransitionDuration)
         {
-            Debug.Log("in transition, transition time = " + timeInTransition + " of " + waveTransitionDuration);
             WaveProperties adjustedWave = waves[waveToReplace];
             adjustedWave.steepness = Mathf.Lerp(originalSteepness, 0, timeInTransition / waveTransitionDuration);
             waves[waveToReplace] = adjustedWave;
-            Debug.Log("decreasing steepness = " + waves[waveToReplace].steepness);
 
             transitionWave = targetWave;
             float transitionSteepness = Mathf.Lerp(0, targetWave.steepness, timeInTransition / waveTransitionDuration);
-            Debug.Log("transition steepness = " + transitionSteepness);
             transitionWave.steepness = Mathf.Lerp(0, targetWave.steepness, timeInTransition / waveTransitionDuration);
             timeInTransition += Time.deltaTime;
-            Debug.Log("setting shader values");
-            Debug.Log("steepnesses = " + waves[0].steepness+ ", " + waves[2].steepness + ", " + waves[3].steepness + ", " + transitionWave.steepness );
         }
         else
         {
-            Debug.Log("completed transition");
-
             waves[waveToReplace] = targetWave;
             waveTransitionInProgress = false;
             timeSinceTransition = 0;
