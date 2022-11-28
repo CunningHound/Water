@@ -11,24 +11,24 @@ public class WaterMesh : MonoBehaviour
     [SerializeField]
     private float nearResolution = 0.25f;
     [SerializeField]
-    private int nearRange = 50;
+    private float nearRange = 50;
 
     [SerializeField]
     private float midResolution = 0.5f;
     [SerializeField]
-    private int midRange = 250;
+    private float midRange = 250;
     public bool enableMidRange = true;
 
     [SerializeField]
     private float farResolution = 1f;
     [SerializeField]
-    private int farRange = 1000;
+    private float farRange = 1000;
     public bool enableFarRange = true;
 
     [SerializeField]
     private float distantResolution = 2f;
     [SerializeField]
-    private int distantRange = 2000;
+    private float distantRange = 2000;
     public bool enableDistantRange = true;
 
     public Material waterMaterial;
@@ -55,7 +55,7 @@ public class WaterMesh : MonoBehaviour
 
     private Mesh GenerateMesh()
     {
-        Mesh nearMesh = GenerateMeshRing(nearRange, nearRange, 0, 0, nearResolution);
+        Mesh nearMesh = GenerateSubmesh(nearRange*2f, nearRange*2f, nearResolution, -nearRange, -nearRange);
         List<Mesh> meshList = new List<Mesh> { nearMesh };
 
         if (enableMidRange)
@@ -93,7 +93,7 @@ public class WaterMesh : MonoBehaviour
         return mesh;
     }
 
-    private Mesh GenerateMeshRing(int widthExternal, int heightExternal, int widthInternal, int heightInternal, float resolution = 1f)
+    private Mesh GenerateMeshRing(float widthExternal, float heightExternal, float widthInternal, float heightInternal, float resolution = 1f)
     {
         CombineInstance[] combine = new CombineInstance[4];
         List<Mesh> meshList = new List<Mesh>();
@@ -101,11 +101,11 @@ public class WaterMesh : MonoBehaviour
         {
             Debug.Log(widthInternal);
             //top centre
-            Mesh top = GenerateSubmesh(widthInternal * 2, heightExternal - heightInternal, resolution, -widthInternal, heightInternal);
+            Mesh top = GenerateSubmesh(widthInternal * 2f, heightExternal - heightInternal, resolution, -widthInternal, heightInternal);
             meshList.Add(top);
 
             //bottom centre
-            Mesh bottom = GenerateSubmesh(widthInternal * 2, heightExternal - heightInternal, resolution, -widthInternal, -heightExternal);
+            Mesh bottom = GenerateSubmesh(widthInternal * 2f, heightExternal - heightInternal, resolution, -widthInternal, -heightExternal);
             meshList.Add(bottom);
         }
 
@@ -121,7 +121,7 @@ public class WaterMesh : MonoBehaviour
 
     }
 
-    public Mesh GenerateSubmesh(int width, int height, float resolution = 1f, float widthOffset = 0f, float heightOffset = 0f)
+    public Mesh GenerateSubmesh(float width, float height, float resolution = 1f, float widthOffset = 0f, float heightOffset = 0f)
     {
         Mesh mesh = new Mesh();
         int vertexCount = 0;
@@ -136,10 +136,12 @@ public class WaterMesh : MonoBehaviour
 
         for (int i = 0; i < widthPoints + 1; i++)
         {
+            float fractionOfWidth = (float)i / (widthPoints);
             for (int j = 0; j < heightPoints + 1; j++)
             {
                 int k = i * (heightPoints + 1) + j;
-                Vector3 point = new Vector3((i * resolution) + widthOffset, 0, (j * resolution) + heightOffset);
+                float fractionOfHeight = (float)j / (heightPoints);
+                Vector3 point = new Vector3( (fractionOfWidth*width) + widthOffset, 0, (fractionOfHeight * height) + heightOffset);
                 vertices[vertexCount++] = point;
                 if (i < widthPoints && j < heightPoints)
                 {
