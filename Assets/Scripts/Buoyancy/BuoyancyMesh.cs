@@ -62,7 +62,7 @@ public class BuoyancyMesh
             Vector3 globalPos = objectTransform.TransformPoint(vertices[i]);
 
             verticesGlobal[i] = globalPos;
-            distancesToWater[i] = globalPos.y; // TODO:
+            distancesToWater[i] = globalPos.y - WaveManager.GetInstance().GetWaterHeightAt(globalPos);
         }
 
         AddTriangles();

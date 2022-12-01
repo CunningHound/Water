@@ -18,6 +18,17 @@ public struct WaveProperties
 
 public class WaveManager : MonoBehaviour
 {
+    static public WaveManager _instance;
+
+    static public WaveManager GetInstance()
+    {
+        if (_instance == null)
+        {
+            _instance = new WaveManager();
+        }
+        return _instance;
+    }
+
     public Material waterMaterial;
 
     public int windDirection;
@@ -39,6 +50,11 @@ public class WaveManager : MonoBehaviour
     private float timeSinceTransition;
     private float timeInTransition;
 
+    private void Awake()
+    {
+        _instance = this;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -54,18 +70,18 @@ public class WaveManager : MonoBehaviour
 
     void FixedUpdate()
     {
-        if(!waveTransitionInProgress)
-        {
-            timeSinceTransition += Time.deltaTime;
-            if( timeSinceTransition > waveTransitionPeriod )
-            {
-                StartWaveTransition();
-            }
-        }
-        else 
-        { 
-            handleWaveTransition(); 
-        }
+        //if(!waveTransitionInProgress)
+        //{
+        //    timeSinceTransition += Time.deltaTime;
+        //    if( timeSinceTransition > waveTransitionPeriod )
+        //    {
+        //        StartWaveTransition();
+        //    }
+        //}
+        //else 
+        //{ 
+        //    handleWaveTransition(); 
+        //}
         SetShaderWaveProperties();
     }
 
