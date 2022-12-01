@@ -62,7 +62,7 @@ public class BuoyancyMesh
             Vector3 globalPos = objectTransform.TransformPoint(vertices[i]);
 
             verticesGlobal[i] = globalPos;
-            distancesToWater[i] = globalPos.y; // TODO:
+            distancesToWater[i] = globalPos.y - WaveManager.GetInstance().GetWaterHeightAt(globalPos);
         }
 
         AddTriangles();
@@ -89,11 +89,7 @@ public class BuoyancyMesh
             // 'triangles' is actually an int[], the triangles are implicit
             for (int j=0; j<3; j++)
             {
-                if(i>=triangles.Length)
-                {
-                    //Debug.Log("triangles has length " + triangles.Length + " but we're trying to get element " + i);
-                }
-                vertexData[j].distanceToWater = distancesToWater[triangles[i]]; // TODO: not entirely accurate
+                vertexData[j].distanceToWater = distancesToWater[triangles[i]];
                 vertexData[j].index = j;
                 vertexData[j].globalPos = verticesGlobal[triangles[i]];
 
@@ -119,14 +115,12 @@ public class BuoyancyMesh
                 Vector3 p2 = vertexData[1].globalPos;
                 Vector3 p3 = vertexData[2].globalPos;
 
-                //Debug.Log("adding fully underwater");
                 underwaterTriangles.Add(new BuoyancyTriangle(p1, p2, p3, rb));
             }
             else
             {
                 vertexData.Sort((x, y) => x.distanceToWater.CompareTo(y.distanceToWater));
                 vertexData.Reverse();
-                //Debug.Log("sorted = " + vertexData[0].distanceToWater + "," + vertexData[1].distanceToWater + ", " + vertexData[2].distanceToWater);
 
                 if (vertexData[1].distanceToWater < 0f)
                 {
@@ -146,40 +140,14 @@ public class BuoyancyMesh
     {
         // h, m, l: highest, medium, lowest vertex. always in that order because we sorted before passing here
         Vector3 h = vertexData[0].globalPos;
-        //Debug.Log("sorted = " + vertexData[0].distanceToWater + "," + vertexData[1].distanceToWater + ", " + vertexData[2].distanceToWater);
-
-        int index_m = vertexData[0].index - 1;
-        if(index_m < 0)
-        {
-            index_m = 2;
-        }
+        Vector3 m = vertexData[1].globalPos;
+        Vector3 l = vertexData[2].globalPos;
 
         float height_h = vertexData[0].distanceToWater;
-        float height_m = 0f;
-        float height_l = 0f;
-
-        Vector3 m = Vector3.zero;
-        Vector3 l = Vector3.zero;
-
-        if(vertexData[1].index == index_m)
-        {
-            m = vertexData[1].globalPos;
-            l = vertexData[2].globalPos;
-
-            height_m = vertexData[1].distanceToWater;
-            height_l = vertexData[2].distanceToWater;
-        }
-        else
-        {
-            m = vertexData[2].globalPos;
-            l = vertexData[1].globalPos;
-
-            height_m = vertexData[2].distanceToWater;
-            height_l = vertexData[1].distanceToWater;
-        }
+        float height_m = vertexData[1].distanceToWater;
+        float height_l = vertexData[2].distanceToWater;
 
         // cut triangle
-        // TODO: improve/understand notation
         Vector3 mh = h - m;
         float t_m = -height_m / (height_h - height_m);
         Vector3 mi_m = t_m * mh;
@@ -190,51 +158,20 @@ public class BuoyancyMesh
         float t_l = -height_l / (height_h - height_l);
         Vector3 li_l = t_l * lh;
         Vector3 i_l = li_l + l;
-        //Debug.Log("Adding one dry (1)");
-        //Debug.Log("h_h = " + height_h + ", h_m = " + height_m + ", h_l = " + height_l);
-        //Debug.Log("tm = " + t_m + ", i_m = " + i_m + ", i_l = " + i_l);
 
         underwaterTriangles.Add(new BuoyancyTriangle(m, i_m, i_l, rb));
-        //Debug.Log("h_h = " + height_h + ", h_l = " + height_l);
-        //Debug.Log("tl = " + t_l + ", li_l = " + li_l + ", i_l = " + i_l);
-        //Debug.Log("Adding one dry (2)");
         underwaterTriangles.Add(new BuoyancyTriangle(m, i_l, l, rb));
     }
 
     private void AddTrianglesTwoDryVertices(List<VertexData> vertexData)
     {
+        Vector3 h = vertexData[0].globalPos;
+        Vector3 m = vertexData[1].globalPos;
         Vector3 l = vertexData[2].globalPos;
 
-        // find index of h
-        int index_h = vertexData[2].index + 1;
-        if( index_h > 2 )
-        {
-            index_h = 0;
-        }
-
+        float height_h = vertexData[0].distanceToWater;
+        float height_m = vertexData[1].distanceToWater;
         float height_l = vertexData[2].distanceToWater;
-        float height_m = 0f;
-        float height_h = 0f;
-
-        Vector3 m = Vector3.zero;
-        Vector3 h = Vector3.zero;
-
-        if (vertexData[1].index == index_h)
-        {
-            h = vertexData[1].globalPos;
-            m = vertexData[0].globalPos;
-
-            height_h = vertexData[1].distanceToWater;
-            height_m = vertexData[0].distanceToWater;
-        }
-        else
-        {
-            h = vertexData[0].globalPos;
-            m = vertexData[1].globalPos;
-
-            height_h = vertexData[0].distanceToWater;
-            height_m = vertexData[1].distanceToWater;
-        }
 
         Vector3 lm = m - l;
         float t_m = -height_l / (height_m - height_l);
@@ -246,8 +183,6 @@ public class BuoyancyMesh
         Vector3 lj_h = t_h * lh;
         Vector3 j_h = lj_h + l;
 
-        //Debug.Log("adding two dry");
-        //Debug.Log(vertexData[0].globalPos + ", " + vertexData[1].globalPos + ", " + vertexData[2].globalPos);
         underwaterTriangles.Add(new BuoyancyTriangle(l, j_h, j_m, rb));
     }
 

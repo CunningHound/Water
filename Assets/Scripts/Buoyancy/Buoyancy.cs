@@ -41,7 +41,7 @@ public class Buoyancy : MonoBehaviour
     {
         if(centreOfMass != null)
         {
-            rb.centerOfMass = centreOfMass.transform.position;
+            rb.centerOfMass = centreOfMass.transform.localPosition;
         }
         buoyancyMesh.GenerateMeshes();
         //buoyancyMesh.DisplayMesh(underwaterMesh, "underwater mesh", buoyancyMesh.underwaterTriangles);
@@ -74,19 +74,22 @@ public class Buoyancy : MonoBehaviour
             BuoyancyTriangle triangleData = underwaterTriangles[i];
 
             Vector3 force = Vector3.zero;
-            force += BuoyancyPhysics.BuoyancyForce(BuoyancyPhysics.RHO_WATER, triangleData);
+            Vector3 buoyancy = BuoyancyPhysics.BuoyancyForce(BuoyancyPhysics.RHO_WATER, triangleData);
 
-            force += BuoyancyPhysics.WaterFrictionalResistance(BuoyancyPhysics.RHO_WATER, triangleData, C_f);
+            Vector3 friction = BuoyancyPhysics.WaterFrictionalResistance(BuoyancyPhysics.RHO_WATER, triangleData, C_f);
 
-            force += BuoyancyPhysics.PressureDrag(triangleData);
+            Vector3 pressureDrag = BuoyancyPhysics.PressureDrag(triangleData);
 
+            force += buoyancy;
+            force += friction;
+            force += pressureDrag;
             // TODO: slamming forces
             //force +=
 
             rb.AddForceAtPosition(force, triangleData.centre);
 
             //Debug.DrawRay(triangleData.centre, triangleData.normal * 3f, Color.white);
-            //Debug.DrawRay(triangleData.centre, buoyancyForce.normalized * -3f, Color.blue);
+            Debug.DrawRay(triangleData.centre, buoyancy, buoyancy.y < 0 ? Color.red : Color.blue);
         }
     }
 

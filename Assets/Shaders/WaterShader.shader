@@ -101,7 +101,7 @@ Shader "Custom/WaterShader"
 
 		void vert(inout appdata_full vertexData)
 		{
-			float3 worldPos = vertexData.vertex.xyz;
+			float3 worldPos = mul(unity_ObjectToWorld, float4(vertexData.vertex.xyz, 1)).xyz;
 
 			float3 tangent = (0, 0, 0);
 			float3 binormal = (0, 0, 0);
@@ -113,7 +113,7 @@ Shader "Custom/WaterShader"
 
 			float3 normal = normalize(cross(binormal, tangent));
 
-			vertexData.vertex.xyz = worldPos;
+			vertexData.vertex.xyz = mul(unity_WorldToObject, float4(worldPos, 1)).xyz;
 			vertexData.normal = normal;
 		}
 

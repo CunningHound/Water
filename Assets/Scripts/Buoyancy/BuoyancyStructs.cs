@@ -30,7 +30,7 @@ public struct BuoyancyTriangle
 
         this.centre = (p1 + p2 + p3) / 3f;
 
-        this.distanceToSurface = -this.centre.y; // TODO
+        this.distanceToSurface = WaveManager.GetInstance().GetWaterHeightAt(this.centre) - this.centre.y;
 
         this.normal = Vector3.Cross(p2 - p1, p3 - p1).normalized;
 

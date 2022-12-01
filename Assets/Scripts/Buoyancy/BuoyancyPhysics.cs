@@ -104,8 +104,12 @@ public class BuoyancyPhysics
 
     public static float ResistanceCoefficient(float rho, float velocity, float length)
     {
-        // TODO: resistance coefficient
-        return 0f;
+        float nu = 0.000001f;
+
+        float Rn = velocity * length / nu;
+
+        float C_f = 0.075f / Mathf.Pow((Mathf.Log10(Rn) - 2f), 2f);
+        return C_f;
     }
 
     public static Vector3 AirResistance(float rho, BuoyancyTriangle triangleData, float C_d)
