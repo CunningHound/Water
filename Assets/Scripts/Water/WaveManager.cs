@@ -45,7 +45,6 @@ public class WaveManager : MonoBehaviour
     public float waveTransitionPeriod;
     public float waveTransitionDuration;
     private bool waveTransitionInProgress;
-    private int decreasingWaveIndex;
 
     private float timeSinceTransition;
     private float timeInTransition;
@@ -70,18 +69,18 @@ public class WaveManager : MonoBehaviour
 
     void FixedUpdate()
     {
-        //if(!waveTransitionInProgress)
-        //{
-        //    timeSinceTransition += Time.deltaTime;
-        //    if( timeSinceTransition > waveTransitionPeriod )
-        //    {
-        //        StartWaveTransition();
-        //    }
-        //}
-        //else 
-        //{ 
-        //    handleWaveTransition(); 
-        //}
+        if (!waveTransitionInProgress)
+        {
+            timeSinceTransition += Time.deltaTime;
+            if (timeSinceTransition > waveTransitionPeriod)
+            {
+                StartWaveTransition();
+            }
+        }
+        else
+        {
+            handleWaveTransition();
+        }
         SetShaderWaveProperties();
     }
 
