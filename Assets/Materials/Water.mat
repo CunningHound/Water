@@ -29,7 +29,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 1
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   disabledShaderPasses:
   - SHADOWCASTER
@@ -94,7 +94,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 1
+    - _Alpha: 0.435
     - _AlphaClip: 0
     - _Blend: 1
     - _BumpScale: 1
@@ -107,9 +107,9 @@ Material:
     - _DstBlend: 10
     - _EnvironmentReflections: 1
     - _GlossMapScale: 0.8
-    - _Glossiness: 0.75
+    - _Glossiness: 0.35
     - _GlossyReflections: 1
-    - _Metallic: 0.323
+    - _Metallic: 0
     - _Mode: 3
     - _OcclusionStrength: 1
     - _Parallax: 0.02
@@ -123,21 +123,24 @@ Material:
     - _Strength: 1
     - _Surface: 1
     - _UVSec: 0
+    - _WaterFogDensity: 2
+    - _WaterMaxFogDepth: 25
     - _WorkflowMode: 1
     - _ZWrite: 0
     m_Colors:
     - _Amplitude: {r: 0.5, g: 0.2, b: 0.05, a: 0}
     - _BaseColor: {r: 0.36009255, g: 0.49602246, b: 0.6415094, a: 0.56078434}
-    - _Color: {r: 0.2742079, g: 0.60916007, b: 0.78, a: 1}
+    - _Color: {r: 0.14509802, g: 0.44181144, b: 0.70980394, a: 0.101960786}
     - _Direction: {r: 45, g: 90, b: 60, a: 200}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
     - _Speed: {r: 0.5, g: 2, b: 5, a: 0}
     - _Steepness: {r: 0.01, g: 0.25, b: 0, a: 0}
-    - _Wave1: {r: 68.165375, g: 0.03242763, b: 3.896939, a: 0}
-    - _Wave2: {r: 110.09672, g: 0.039685957, b: 3.7005696, a: 1}
-    - _Wave3: {r: 97.826385, g: 0.034710355, b: 1.6648577, a: 2}
-    - _Wave4: {r: 93.52036, g: 0.039874427, b: 2.5792294, a: 3}
-    - _Wave5: {r: 97.826385, g: 0, b: 1.6648577, a: 0}
+    - _WaterFogColour: {r: 0.103729084, g: 0.12362409, b: 0.3490566, a: 1}
+    - _Wave1: {r: 98.199455, g: 0.011068787, b: 4.837057, a: 0}
+    - _Wave2: {r: 80.49835, g: 0.03327458, b: 2.1396613, a: 1}
+    - _Wave3: {r: 79.94557, g: 6.817482e-24, b: 4.413328, a: 2}
+    - _Wave4: {r: 74.49462, g: 0.014439807, b: 4.798932, a: 3}
+    - _Wave5: {r: 106.65758, g: 0.007610877, b: 4.923745, a: 0}
     - _Wavelength: {r: 100, g: 50, b: 10, a: 10}
   m_BuildTextureStacks: []

@@ -2,11 +2,14 @@ Shader "Custom/WaterShader"
 {
     Properties
     {
-        _Color("Color", Color) = (0.1,0.5,1,1)
+        _Color("Color", Color) = (0.1,0.5,1,0.7)
 		_MainTex("Albedo (RGB)", 2D) = "white" {}
 		_Glossiness("Smoothness", Range(0,1)) = 0.5
 		_Metallic("Metallic", Range(0,1)) = 0.4
-		_Alpha("Alpha", Range(0,1)) = 0.5
+
+		_WaterFogColour("Water Fog Colour", Color) = (0.1,0.5,1)
+		_WaterMaxFogDepth("Water Max Fog Depth", Range(0,50)) = 10
+
 		_Wave1("Wave 1 (dir, steepness, wavelength)", Vector) = (90, 0.3, 15, 0)
 		_Wave2("Wave 2 (dir, steepness, wavelength)", Vector) = (80, 0.2, 8, 0)
 		_Wave3("Wave 3 (dir, steepness, wavelength)", Vector) = (100, 0.1, 4, 0)
@@ -20,15 +23,16 @@ Shader "Custom/WaterShader"
 		{
 			"RenderType" = "Transparent"
 		}
-		LOD 200
-		CULL OFF
+
+		GrabPass{ "_WaterBackground" }
 
 		CGPROGRAM
-		#pragma surface surf Standard fullforwardshadows vertex:vert addshadow
-
+		#pragma surface surf Standard vertex:vert addshadow finalcolor:ResetAlpha
+		#include "Underwater.cginc"
 
 		struct Input {
 			float2 uv_MainTex;
+			float4 screenPos;
 		};
 
 		sampler2D _MainTex;
@@ -39,13 +43,20 @@ Shader "Custom/WaterShader"
 
 		void surf(Input IN, inout SurfaceOutputStandard o)
 		{
-			fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
+			//fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
+			fixed4 c = _Color;
 			o.Albedo = c.rgb;
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
 			o.Alpha = c.a;
+
+			o.Emission = UnderwaterColour(IN.screenPos) * (1-c.a);
 		}
 
+		void ResetAlpha(Input IN, SurfaceOutputStandard o, inout fixed4 colour)
+		{
+			colour.a = 1;
+		}
 
 		//float4 _Steepness;
 		//float4 _Wavelength;
@@ -119,5 +130,4 @@ Shader "Custom/WaterShader"
 
 		ENDCG
 	}
-	FallBack "Diffuse"
 }
