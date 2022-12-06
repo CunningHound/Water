@@ -5,7 +5,9 @@ Shader "Custom/WaterShader"
         _Color("Color", Color) = (0.1,0.5,1,0.7)
 		_MainTex("Albedo (RGB)", 2D) = "white" {}
 		_Glossiness("Smoothness", Range(0,1)) = 0.5
-		_Metallic("Metallic", Range(0,1)) = 0.4
+		_Occlusion("Occlusion", Range(0,1)) = 0.4
+		_SpecularLightColor("Specular colour", Color) = (0.7,0.8,0.9,1)
+		_PeakColour("Peak Colour", Color) = (0.2,0.6,1,0.8)
 
 		_WaterFogColour("Water Fog Colour", Color) = (0.1,0.5,1)
 		_WaterMaxFogDepth("Water Max Fog Depth", Range(0,50)) = 10
@@ -27,33 +29,38 @@ Shader "Custom/WaterShader"
 		GrabPass{ "_WaterBackground" }
 
 		CGPROGRAM
-		#pragma surface surf Standard vertex:vert addshadow finalcolor:ResetAlpha
+		#pragma surface surf StandardSpecular vertex:vert addshadow finalcolor:ResetAlpha alpha:premul
 		#include "Underwater.cginc"
 
 		struct Input {
 			float2 uv_MainTex;
 			float4 screenPos;
+			float3 worldPos;
 		};
 
 		sampler2D _MainTex;
 
 		half _Glossiness;
-		half _Metallic;
+		half _Occlusion;
 		float4 _Color;
+		float4 _SpecularLightColor;
+		float4 _PeakColour;
 
-		void surf(Input IN, inout SurfaceOutputStandard o)
+		void surf(Input IN, inout SurfaceOutputStandardSpecular o)
 		{
-			//fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
-			fixed4 c = _Color;
+			float worldHeight = IN.worldPos.y;
+			float lerpToPeakFactor = clamp(worldHeight + 0.5, 0.0, 1.0);
+			fixed4 c = lerp(_Color, _PeakColour, lerpToPeakFactor);
 			o.Albedo = c.rgb;
-			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
+			o.Occlusion = _Occlusion;
+			o.Specular = _SpecularLightColor.rgb;
 			o.Alpha = c.a;
 
 			o.Emission = UnderwaterColour(IN.screenPos) * (1-c.a);
 		}
 
-		void ResetAlpha(Input IN, SurfaceOutputStandard o, inout fixed4 colour)
+		void ResetAlpha(Input IN, SurfaceOutputStandardSpecular o, inout fixed4 colour)
 		{
 			colour.a = 1;
 		}
