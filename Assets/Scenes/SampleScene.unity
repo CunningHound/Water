@@ -502,15 +502,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   focusObject: {fileID: 963194225}
   nearResolution: 0.1
-  nearRange: 20
+  nearRange: 40
   midResolution: 0.2
-  midRange: 40
+  midRange: 80
   enableMidRange: 1
   farResolution: 0.4
-  farRange: 100
+  farRange: 320
   enableFarRange: 1
   distantResolution: 1
-  distantRange: 300
+  distantRange: 1000
   enableDistantRange: 1
   waterMaterial: {fileID: 2100000, guid: 1e83142265450f74892a751cbcecb7c4, type: 2}
 --- !u!1 &1617775990
@@ -740,11 +740,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   waterMaterial: {fileID: 2100000, guid: 1e83142265450f74892a751cbcecb7c4, type: 2}
   windDirection: 90
-  windSpeed: 5
+  windSpeed: 15
   minWavelength: 1.5
-  minSteepness: 0.001
-  waveTransitionPeriod: 2
-  waveTransitionDuration: 2
+  minSteepness: 0.01
+  waveTransitionPeriod: 10
+  waveTransitionDuration: 10
 --- !u!4 &1888044258
 Transform:
   m_ObjectHideFlags: 0

@@ -12,7 +12,7 @@ float _WaterMaxFogDepth;
 float3 UnderwaterColour (float4 screenPos) {
 	float2 uv = screenPos.xy / screenPos.w;
 	float bgDepth = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(screenPos)));
-	float surfaceDepth = LinearEyeDepth(screenPos.w);
+	float surfaceDepth = LinearEyeDepth(screenPos.z/screenPos.w);
 	float3 bgColour = tex2D(_WaterBackground,uv).rgb;
 	float waterDepth = (bgDepth - surfaceDepth);
 	float fogDensity = 1;
