@@ -131,6 +131,7 @@ public class WaterMesh : MonoBehaviour
         int heightPoints = (int)(height / resolution);
         Vector3[] vertices = new Vector3[(widthPoints + 1) * (heightPoints + 1)];
         int[] triangles = new int[widthPoints * heightPoints * 2 * 3];
+        Vector2[] uvs = new Vector2[(widthPoints + 1) * (heightPoints + 1)];
         if ((widthPoints + 1) * (heightPoints + 1) >= 256 * 256)
             mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 
@@ -145,6 +146,8 @@ public class WaterMesh : MonoBehaviour
                 vertices[vertexCount++] = point;
                 if (i < widthPoints && j < heightPoints)
                 {
+                    Vector2 uv = new Vector2((float)i / (float)(widthPoints-1), (float)j / (float)(heightPoints-1));
+                    uvs[i + j * widthPoints] = uv;
                     triangles[triangleIndex++] = k;
                     triangles[triangleIndex++] = k + 1;
                     triangles[triangleIndex++] = k + heightPoints + 1;
@@ -157,6 +160,7 @@ public class WaterMesh : MonoBehaviour
         }
         mesh.vertices = vertices;
         mesh.triangles = triangles;
+        mesh.uv = uvs;
 
         return mesh;
     }
