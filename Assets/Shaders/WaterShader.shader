@@ -2,11 +2,20 @@ Shader "Custom/WaterShader"
 {
     Properties
     {
-        _Color("Color", Color) = (0.1,0.5,1,1)
-		_MainTex("Albedo (RGB)", 2D) = "white" {}
+        _Color("Color", Color) = (0.1,0.5,1,0.7)
 		_Glossiness("Smoothness", Range(0,1)) = 0.5
-		_Metallic("Metallic", Range(0,1)) = 0.4
-		_Alpha("Alpha", Range(0,1)) = 0.5
+		_Occlusion("Occlusion", Range(0,1)) = 0.4
+		_SpecularLightColor("Specular colour", Color) = (0.7,0.8,0.9,1)
+		_PeakColour("Peak Colour", Color) = (0.2,0.6,1,0.8)
+
+		_SpecularNoise1("Colour noise 1", 2D) = "white" {}
+		_SpecularNoise2("Colour noise 2", 2D) = "white" {}
+		_ScrollSpeedU("Scroll speed U", Range(0,1)) = 0.05
+		_ScrollSpeedV("Scroll speed V", Range(0,1)) = 0.05
+		_RandomSpecularThreshold("Random specular threshold", Range(0,1)) = 0.9
+		_WaterFogColour("Water Fog Colour", Color) = (0.1,0.5,1)
+		_WaterMaxFogDepth("Water Max Fog Depth", Range(0,50)) = 10
+
 		_Wave1("Wave 1 (dir, steepness, wavelength)", Vector) = (90, 0.3, 15, 0)
 		_Wave2("Wave 2 (dir, steepness, wavelength)", Vector) = (80, 0.2, 8, 0)
 		_Wave3("Wave 3 (dir, steepness, wavelength)", Vector) = (100, 0.1, 4, 0)
@@ -20,32 +29,60 @@ Shader "Custom/WaterShader"
 		{
 			"RenderType" = "Transparent"
 		}
-		LOD 200
-		CULL OFF
+
+		GrabPass{ "_WaterBackground" }
 
 		CGPROGRAM
-		#pragma surface surf Standard fullforwardshadows vertex:vert addshadow
-
+		#pragma surface surf StandardSpecular vertex:vert addshadow finalcolor:ResetAlpha alpha:premul
+		#include "Underwater.cginc"
 
 		struct Input {
-			float2 uv_MainTex;
+			float2 uv_SpecularNoise1;
+			float2 uv_SpecularNoise2;
+			float4 screenPos;
+			float3 worldPos;
 		};
 
-		sampler2D _MainTex;
+		sampler2D _SpecularNoise1;
+		sampler2D _SpecularNoise2;
+		float _ScrollSpeedU;
+		float _ScrollSpeedV;
+		float _RandomSpecularThreshold;
 
 		half _Glossiness;
-		half _Metallic;
+		half _Occlusion;
 		float4 _Color;
+		float4 _SpecularLightColor;
+		float4 _PeakColour;
 
-		void surf(Input IN, inout SurfaceOutputStandard o)
+		void surf(Input IN, inout SurfaceOutputStandardSpecular o)
 		{
-			fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
+			float worldHeight = IN.worldPos.y;
+			float lerpToPeakFactor = clamp(worldHeight + 0.5, 0.0, 1.0);
+			fixed4 c = lerp(_Color, _PeakColour, lerpToPeakFactor);
 			o.Albedo = c.rgb;
-			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
+			o.Occlusion = _Occlusion;
+			o.Specular = _SpecularLightColor.rgb;
 			o.Alpha = c.a;
+
+			o.Emission = UnderwaterColour(IN.screenPos) * (1-c.a);
+
+			fixed4 c_random_spec1 = tex2D(_SpecularNoise1, IN.uv_SpecularNoise1);
+			fixed2 uv_Spec2 = IN.uv_SpecularNoise2;
+			uv_Spec2 += fixed2(_ScrollSpeedU*_Time.y, _ScrollSpeedV*_Time.y);
+			fixed4 c_random_spec2 = tex2D(_SpecularNoise2, uv_Spec2);
+			fixed4 combined_random_spec = (c_random_spec1 + c_random_spec2)/2.0;
+			if(length(combined_random_spec)/3.0 > _RandomSpecularThreshold)
+			{
+				o.Emission = fixed4(1,1,1,1);
+			}
 		}
 
+		void ResetAlpha(Input IN, SurfaceOutputStandardSpecular o, inout fixed4 colour)
+		{
+			colour.a = 1;
+		}
 
 		//float4 _Steepness;
 		//float4 _Wavelength;
@@ -119,5 +156,4 @@ Shader "Custom/WaterShader"
 
 		ENDCG
 	}
-	FallBack "Diffuse"
 }
