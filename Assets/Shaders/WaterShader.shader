@@ -138,20 +138,28 @@ Shader "Custom/WaterShader"
 
 		void vert(inout appdata_full vertexData)
 		{
-			float3 worldPos = mul(unity_ObjectToWorld, float4(vertexData.vertex.xyz, 1)).xyz;
+			float waveScaleFactor = vertexData.vertex.y;
+			vertexData.vertex.y = 0;
+			float3 worldPos = mul(unity_ObjectToWorld, float4(vertexData.vertex.x, 0, vertexData.vertex.z, 1)).xyz;
 
 			float3 tangent = (0, 0, 0);
 			float3 binormal = (0, 0, 0);
-			worldPos += gerstnerWave(_Wave1, worldPos, tangent, binormal);
-			worldPos += gerstnerWave(_Wave2, worldPos, tangent, binormal);
-			worldPos += gerstnerWave(_Wave3, worldPos, tangent, binormal);
-			worldPos += gerstnerWave(_Wave4, worldPos, tangent, binormal);
-			worldPos += gerstnerWave(_Wave5, worldPos, tangent, binormal);
+			if(waveScaleFactor > 0)
+			{
+				worldPos += gerstnerWave(_Wave1, worldPos, tangent, binormal);
+				worldPos += gerstnerWave(_Wave2, worldPos, tangent, binormal);
+				worldPos += gerstnerWave(_Wave3, worldPos, tangent, binormal);
+				worldPos += gerstnerWave(_Wave4, worldPos, tangent, binormal);
+				worldPos += gerstnerWave(_Wave5, worldPos, tangent, binormal);
+				//worldPos.y *= waveScaleFactor;
+			}
 
-			float3 normal = normalize(cross(binormal, tangent));
+			//float3 normal = normalize(cross(binormal, tangent));
+			//float3 normal = (0,1,0);
 
 			vertexData.vertex.xyz = mul(unity_WorldToObject, float4(worldPos, 1)).xyz;
-			vertexData.normal = normal;
+			//vertexData.vertex.y = waveScaleFactor;
+			//vertexData.normal = normal;
 		}
 
 		ENDCG

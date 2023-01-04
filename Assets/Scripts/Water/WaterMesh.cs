@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class WaterMesh : MonoBehaviour
@@ -143,6 +144,9 @@ public class WaterMesh : MonoBehaviour
                 int k = i * (heightPoints + 1) + j;
                 float fractionOfHeight = (float)j / (heightPoints);
                 Vector3 point = new Vector3( (fractionOfWidth*width) + widthOffset, 0, (fractionOfHeight * height) + heightOffset);
+                point.y = Mathf.Clamp( GetDepthAt(point + focusObject.transform.position) - 1f, -5f, 5f);
+                point.y = -point.y/5f;
+                //Debug.Log("setting y = " + point.y);
                 vertices[vertexCount++] = point;
                 if (i < widthPoints && j < heightPoints)
                 {
@@ -163,6 +167,28 @@ public class WaterMesh : MonoBehaviour
         mesh.uv = uvs;
 
         return mesh;
+    }
+
+    private float GetDepthAt(Vector3 pos)
+    {
+        Terrain currentTerrain = GetNearestTerrain(pos);
+        float height = currentTerrain.SampleHeight(pos);
+        height += currentTerrain.transform.position.y;
+        //Debug.Log("height at " + pos + " = " + height);
+        return height;
+    }
+
+    private Terrain GetNearestTerrain(Vector3 pos)
+    {
+        Terrain[] terrains = Terrain.activeTerrains;
+        return terrains.OrderBy(x =>
+        {
+            Vector3 terrainPos = x.transform.position;
+            Vector3 terrainSize = x.terrainData.size * 0.5f;
+            Vector3 terrainCentre = new Vector3(terrainPos.x + terrainSize.x, terrainPos.y + terrainSize.y, 0);
+            return Vector3.Distance(terrainCentre, pos);
+        }).First();
+
     }
 }
 
