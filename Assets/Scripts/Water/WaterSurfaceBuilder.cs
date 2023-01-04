@@ -4,23 +4,36 @@ using UnityEngine;
 
 public class WaterSurfaceBuilder : MonoBehaviour
 {
-    public GameObject surfacePrefab;
+    public GameObject LODGroupPrefab;
     public Vector2 origin;
     public float squareDimensions;
-    public int squareResolution;
+    public int[] squareResolutions;
     public Vector2 numberOfSquares;
+
+    public Material waterMaterial;
 
     void Awake()
     {
-        if(surfacePrefab != null)
+        if(LODGroupPrefab != null)
         {
-            MeshFilter meshFilter = surfacePrefab.GetComponent<MeshFilter>();
-            meshFilter.mesh = GenerateMesh(squareDimensions, squareResolution);
-            for(int i=0; i<numberOfSquares.x; i++)
+            LODGroup lodGroup = LODGroupPrefab.GetComponent<LODGroup>();
+            LOD[] lods = lodGroup.GetLODs();
+            for (int i = 0; i < squareResolutions.Length; i++)
             {
-                for(int j=0; j<numberOfSquares.y; j++)
+                GameObject lod = lods[i].renderers[0].gameObject;
+                MeshFilter meshFilter = lod.GetComponent<MeshFilter>();
+                meshFilter.mesh = GenerateMesh(squareDimensions, squareResolutions[i]);
+                Renderer[] renderers = new Renderer[1];
+                renderers[0] = lod.GetComponent<MeshRenderer>();
+                lods[i] = new LOD(lods[i].screenRelativeTransitionHeight, renderers);
+            }
+            lodGroup.SetLODs(lods);
+
+            for (int x = 0; x < numberOfSquares.x; x++)
+            {
+                for (int y = 0; y < numberOfSquares.y; y++)
                 {
-                    Instantiate(surfacePrefab, new Vector3(origin.x + i*squareDimensions, 0, origin.y + j*squareDimensions), Quaternion.identity);
+                    Instantiate(LODGroupPrefab, new Vector3(origin.x + x * squareDimensions, 0, origin.y + y * squareDimensions), Quaternion.identity);
                 }
             }
         }

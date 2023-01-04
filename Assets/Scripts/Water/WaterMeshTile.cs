@@ -5,9 +5,6 @@ using UnityEngine;
 
 public class WaterMeshTile : MonoBehaviour
 {
-    public float size;
-    public int resolution;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -21,6 +18,7 @@ public class WaterMeshTile : MonoBehaviour
 
     private void SetDepths(Mesh mesh)
     {
+        Debug.Log("setting depths!");
         Vector3[] vertices = mesh.vertices;
         for (int i = 0; i < vertices.Length; i++)
         {
