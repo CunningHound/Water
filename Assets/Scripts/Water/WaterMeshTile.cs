@@ -20,34 +20,22 @@ public class WaterMeshTile : MonoBehaviour
     {
         Debug.Log("setting depths!");
         Vector3[] vertices = mesh.vertices;
+        Terrain terrain = Terrain.activeTerrain;
         for (int i = 0; i < vertices.Length; i++)
         {
             Vector3 v = vertices[i];
-            v.y = Mathf.Clamp(GetDepthAt(v + gameObject.transform.position) - 1f, -5f, 5f);
+            v.y = Mathf.Clamp(GetDepthAt(terrain, v + gameObject.transform.position) - 1f, -5f, 0f);
             v.y /= -5f;
             vertices[i] = v;
         }
         mesh.vertices = vertices;
     }
 
-    private float GetDepthAt(Vector3 pos)
+    private float GetDepthAt(Terrain terrain, Vector3 pos)
     {
-        Terrain terrain = GetNearestTerrain(pos);
         float height = terrain.SampleHeight(pos);
         height += terrain.transform.position.y;
         return height;
     }
 
-    private Terrain GetNearestTerrain(Vector3 pos)
-    {
-        Terrain[] terrains = Terrain.activeTerrains;
-        return terrains.OrderBy(x =>
-        {
-            Vector3 terrainPos = x.transform.position;
-            Vector3 terrainSize = x.terrainData.size * 0.5f;
-            Vector3 terrainCentre = new Vector3(terrainPos.x + terrainSize.x, terrainPos.y + terrainSize.y, 0);
-            return Vector3.Distance(terrainCentre, pos);
-        }).First();
-
-    }
 }

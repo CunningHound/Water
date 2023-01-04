@@ -213,7 +213,7 @@ MonoBehaviour:
   origin: {x: 20, y: 30}
   squareDimensions: 10
   squareResolutions: 00010000800000004000000020000000
-  numberOfSquares: {x: 18, y: 22}
+  numberOfSquares: {x: 20, y: 21}
   waterMaterial: {fileID: 2100000, guid: 1e83142265450f74892a751cbcecb7c4, type: 2}
 --- !u!4 &319188109
 Transform:
