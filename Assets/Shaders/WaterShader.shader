@@ -151,15 +151,13 @@ Shader "Custom/WaterShader"
 				worldPos += gerstnerWave(_Wave3, worldPos, tangent, binormal);
 				worldPos += gerstnerWave(_Wave4, worldPos, tangent, binormal);
 				worldPos += gerstnerWave(_Wave5, worldPos, tangent, binormal);
-				//worldPos.y *= waveScaleFactor;
+				worldPos.y *= waveScaleFactor;
 			}
 
-			//float3 normal = normalize(cross(binormal, tangent));
-			//float3 normal = (0,1,0);
+			float3 normal = normalize(cross(binormal, tangent));
 
 			vertexData.vertex.xyz = mul(unity_WorldToObject, float4(worldPos, 1)).xyz;
-			//vertexData.vertex.y = waveScaleFactor;
-			//vertexData.normal = normal;
+			vertexData.normal = normal;
 		}
 
 		ENDCG
