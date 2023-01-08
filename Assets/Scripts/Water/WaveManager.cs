@@ -126,7 +126,7 @@ public class WaveManager : MonoBehaviour
 
     WaveProperties GetNewWave()
     {
-        return new WaveProperties(Random.Range(windDirection - 30f, windDirection + 30f), Random.Range(minSteepness,windSpeed*0.01f), Random.Range(minWavelength, windSpeed/2f));
+        return new WaveProperties(Random.Range(windDirection - 30f, windDirection + 30f), Random.Range(minSteepness,windSpeed*0.02f), Random.Range(minWavelength, windSpeed/4f));
     }
 
     void SetShaderWaveProperties()
