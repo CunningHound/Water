@@ -12,7 +12,6 @@ public class WaterMeshTile : MonoBehaviour
         if(filter != null && filter.mesh != null)
         {
             SetDepths(filter.mesh);
-            Debug.Log(gameObject.transform.position);
         }
     }
 
@@ -37,5 +36,4 @@ public class WaterMeshTile : MonoBehaviour
         height += terrain.transform.position.y;
         return height;
     }
-
 }
