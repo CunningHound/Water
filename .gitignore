@@ -59,3 +59,5 @@ sysinfo.txt
 crashlytics-build.properties
 
 /Assets/FloatingEntities
+/Assets/Textures/Third party
+/Assets/Textures/Third party.meta
