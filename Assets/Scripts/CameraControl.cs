@@ -12,6 +12,8 @@ public class CameraControl : MonoBehaviour
     private float verticalMovement = 0;
     private Vector2 lookChange = new Vector2(0,0);
 
+    public float minimumTerrainClearance;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -43,6 +45,11 @@ public class CameraControl : MonoBehaviour
             transform.position += new Vector3(0, verticalMovement * verticalSpeed * Time.deltaTime, 0);
         }
 
+        float altitude = GetAltitude();
+        if(altitude < minimumTerrainClearance)
+        {
+            transform.position += new Vector3(0, minimumTerrainClearance - altitude, 0);
+        }
 
     }
 
@@ -61,5 +68,16 @@ public class CameraControl : MonoBehaviour
     {
         lookChange = input.Get<Vector2>();
         lookChange.y = 0;
+    }
+
+    public float GetAltitude()
+    {
+        Terrain terrain = Terrain.activeTerrain;
+        if (terrain != null)
+        {
+            float altitudeFromTerrain = transform.position.y - terrain.SampleHeight(transform.position) - terrain.transform.position.y;
+            return Mathf.Min(altitudeFromTerrain, transform.position.y);
+        }
+        return 10000f; // arbitrary large value
     }
 }
