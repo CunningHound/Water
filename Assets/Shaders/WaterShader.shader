@@ -8,11 +8,6 @@ Shader "Custom/WaterShader"
 		_SpecularLightColor("Specular colour", Color) = (0.7,0.8,0.9,1)
 		_PeakColour("Peak Colour", Color) = (0.2,0.6,1,0.8)
 
-		_SpecularNoise1("Colour noise 1", 2D) = "white" {}
-		_SpecularNoise2("Colour noise 2", 2D) = "white" {}
-		_ScrollSpeedU("Scroll speed U", Range(0,1)) = 0.05
-		_ScrollSpeedV("Scroll speed V", Range(0,1)) = 0.05
-		_RandomSpecularThreshold("Random specular threshold", Range(0,1)) = 0.9
 		_WaterFogColour("Water Fog Colour", Color) = (0.1,0.5,1)
 		_WaterMaxFogDepth("Water Max Fog Depth", Range(0,50)) = 10
 
@@ -43,12 +38,6 @@ Shader "Custom/WaterShader"
 			float3 worldPos;
 		};
 
-		sampler2D _SpecularNoise1;
-		sampler2D _SpecularNoise2;
-		float _ScrollSpeedU;
-		float _ScrollSpeedV;
-		float _RandomSpecularThreshold;
-
 		half _Glossiness;
 		half _Occlusion;
 		float4 _Color;
@@ -67,16 +56,6 @@ Shader "Custom/WaterShader"
 			o.Alpha = c.a;
 
 			o.Emission = UnderwaterColour(IN.screenPos) * (1-c.a);
-
-			fixed4 c_random_spec1 = tex2D(_SpecularNoise1, IN.uv_SpecularNoise1);
-			fixed2 uv_Spec2 = IN.uv_SpecularNoise2;
-			uv_Spec2 += fixed2(_ScrollSpeedU*_Time.y, _ScrollSpeedV*_Time.y);
-			fixed4 c_random_spec2 = tex2D(_SpecularNoise2, uv_Spec2);
-			fixed4 combined_random_spec = (c_random_spec1 + c_random_spec2)/2.0;
-			if(length(combined_random_spec)/3.0 > _RandomSpecularThreshold)
-			{
-				o.Emission = fixed4(1,1,1,1);
-			}
 		}
 
 		void ResetAlpha(Input IN, SurfaceOutputStandardSpecular o, inout fixed4 colour)
@@ -138,15 +117,21 @@ Shader "Custom/WaterShader"
 
 		void vert(inout appdata_full vertexData)
 		{
-			float3 worldPos = mul(unity_ObjectToWorld, float4(vertexData.vertex.xyz, 1)).xyz;
+			float waveScaleFactor = vertexData.vertex.y;
+			vertexData.vertex.y = 0;
+			float3 worldPos = mul(unity_ObjectToWorld, float4(vertexData.vertex.x, 0, vertexData.vertex.z, 1)).xyz;
 
 			float3 tangent = (0, 0, 0);
 			float3 binormal = (0, 0, 0);
-			worldPos += gerstnerWave(_Wave1, worldPos, tangent, binormal);
-			worldPos += gerstnerWave(_Wave2, worldPos, tangent, binormal);
-			worldPos += gerstnerWave(_Wave3, worldPos, tangent, binormal);
-			worldPos += gerstnerWave(_Wave4, worldPos, tangent, binormal);
-			worldPos += gerstnerWave(_Wave5, worldPos, tangent, binormal);
+			if(waveScaleFactor > 0)
+			{
+				worldPos += gerstnerWave(_Wave1, worldPos, tangent, binormal);
+				worldPos += gerstnerWave(_Wave2, worldPos, tangent, binormal);
+				worldPos += gerstnerWave(_Wave3, worldPos, tangent, binormal);
+				worldPos += gerstnerWave(_Wave4, worldPos, tangent, binormal);
+				worldPos += gerstnerWave(_Wave5, worldPos, tangent, binormal);
+				worldPos.y *= waveScaleFactor;
+			}
 
 			float3 normal = normalize(cross(binormal, tangent));
 
